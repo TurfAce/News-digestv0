@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  interests String[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Article {
+  id          String    @id @default(uuid())
+  title       String
+  url         String    @unique
+  sourceName  String    @map("source_name")
+  publishedAt DateTime  @map("published_at")
+  category    String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  insights    Insight[]
+
+  @@map("articles")
+}
+
+model Insight {
+  id              String  @id @default(uuid())
+  articleId       String  @map("article_id")
+  summary         String
+  opinionPositive String? @map("opinion_positive")
+  opinionCritical String? @map("opinion_critical")
+  article         Article @relation(fields: [articleId], references: [id])
+
+  @@map("insights")
+}
