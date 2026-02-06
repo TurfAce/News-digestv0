@@ -12,7 +12,7 @@ export async function generateNewsInsights(title: string, summary: string) {
 概要: ${summary}
 
 以下の形式で回答してください:
-
+それぞれの文字数を最大100文字程度とします
 【要約】
 - (ニュースの内容を、背景知識がない人にも伝わるように3行程度で要約)
 
