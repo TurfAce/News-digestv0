@@ -15,7 +15,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast" // Assuming use-toast exists, if not I'll just remove or strictly check after.
 import { updateInterests } from "./actions" // Will create this next
 import { INTEREST_GENRES } from "@/lib/constants"
 
