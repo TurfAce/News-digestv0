@@ -27,7 +27,7 @@ export default async function MyPage() {
     // If no user record exists yet, we can treat it as empty interests or create one on the fly.
     // However, InterestEditor handles the update (upsert).
     // For display, if dbUser is null, interests are empty.
-    const interests = dbUser?.interests || []
+    const interests: string[] = dbUser?.interests || []
 
     return (
         <div className="flex flex-col min-h-screen">
