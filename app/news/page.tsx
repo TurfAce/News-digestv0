@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
 import { prisma } from "@/lib/prisma"
 import { Header } from "@/components/header"
@@ -16,17 +15,16 @@ export default async function NewsPage() {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-        return redirect('/login')
+    let userInterests: string[] = []
+
+    if (user) {
+        // Fetch user interests from DB if logged in
+        const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { interests: true }
+        })
+        userInterests = dbUser?.interests || []
     }
-
-    // Fetch user interests from DB
-    const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { interests: true }
-    })
-
-    const userInterests = dbUser?.interests || []
 
     // サーバーサイドでデータを取得
     const allNewsItems = await fetchLatestNews();

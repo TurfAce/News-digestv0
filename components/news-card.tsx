@@ -21,9 +21,12 @@ export interface NewsItem {
 
 interface NewsCardProps {
     news: NewsItem
+    isSaved?: boolean
+    onToggleSaved?: (id: string) => void
+    priority?: boolean
 }
 
-export function NewsCard({ news }: NewsCardProps) {
+export function NewsCard({ news, isSaved, onToggleSaved, priority }: NewsCardProps) {
     const [showInsights, setShowInsights] = useState(false)
 
     return (

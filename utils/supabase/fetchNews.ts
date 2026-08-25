@@ -31,32 +31,38 @@ export async function fetchLatestNews(): Promise<NewsItem[]> {
         try {
             const feedData = await parser.parseURL(feed.url);
 
-            const items = await Promise.all(feedData.items.slice(0, 1).map(async (item) => {
+            const items = await Promise.all(feedData.items.slice(0, 3).map(async (item) => {
                 const articleUrl = item.link || '#';
                 const articleTitle = item.title || 'タイトルなし';
                 const publishedAt = item.isoDate ? new Date(item.isoDate) : new Date();
 
-                // Save article to database (upsert to avoid duplicates)
-                const savedArticle = await prisma.article.upsert({
-                    where: { url: articleUrl },
-                    update: {
-                        title: articleTitle,
-                        publishedAt,
-                    },
-                    create: {
-                        title: articleTitle,
-                        url: articleUrl,
-                        sourceName: feed.source,
-                        publishedAt,
-                        category: feed.category,
-                    }
-                });
+                let articleId = item.guid || articleUrl;
+                try {
+                    // Save article to database (upsert to avoid duplicates)
+                    const savedArticle = await prisma.article.upsert({
+                        where: { url: articleUrl },
+                        update: {
+                            title: articleTitle,
+                            publishedAt,
+                        },
+                        create: {
+                            title: articleTitle,
+                            url: articleUrl,
+                            sourceName: feed.source,
+                            publishedAt,
+                            category: feed.category,
+                        }
+                    });
+                    articleId = savedArticle.id;
+                } catch (dbError) {
+                    console.warn(`[fetchNews] DB upsert failed for ${articleUrl}. Using fallback ID.`, dbError);
+                }
 
                 return {
-                    id: savedArticle.id, // Use database ID
+                    id: articleId,
                     title: articleTitle,
                     summary: item.contentSnippet?.substring(0, 80) + '...' || '概要はありません',
-                    date: publishedAt.toLocaleDateString(),
+                    date: publishedAt.toLocaleDateString('ja-JP'),
                     category: feed.category,
                     imageUrl: CATEGORY_IMAGES[feed.category] || CATEGORY_IMAGES['その他'],
                     url: articleUrl
