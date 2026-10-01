@@ -1,64 +1,33 @@
-import { Quote } from "lucide-react"
-
-const testimonials = [
-  {
-    quote: "面接で「最近気になるニュースは?」と聞かれたとき、このサービスで読んだ記事と意見案をもとに話したら、面接官に感心されました。",
-    name: "田中 優花",
-    role: "早稲田大学 / IT業界内定",
-    initial: "T",
-  },
-  {
-    quote: "毎朝の情報収集が本当に楽になりました。特にAIの意見案は、自分の考えを深めるきっかけになって重宝しています。",
-    name: "鈴木 健太",
-    role: "慶應義塾大学 / コンサル業界内定",
-    initial: "S",
-  },
-  {
-    quote: "金融業界志望で、日経を読む習慣がなかった私でも、このサービスのおかげで業界知識を深められました。第一志望から内定もらえました!",
-    name: "佐藤 美咲",
-    role: "東京大学 / メガバンク内定",
-    initial: "S",
-  },
-]
-
 export function TestimonialsSection() {
   return (
-    <section className="py-20 md:py-28 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            内定者の声
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            実際にNews Digest for Interviewを使って内定を獲得した先輩たちの声
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <div 
-              key={index}
-              className="bg-card rounded-2xl p-8 border border-border relative"
-            >
-              <Quote className="w-10 h-10 text-accent/20 absolute top-6 right-6" />
-              <p className="text-foreground leading-relaxed mb-6 relative z-10">
-                {testimonial.quote}
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-semibold">
-                    {testimonial.initial}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                </div>
-              </div>
+    <section className="px-4 py-20">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-sm font-medium text-accent">使い方の例</p>
+        <h2 className="mt-3 text-3xl font-bold">
+          企業研究から、面接前の振り返りまで。
+        </h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
+          {[
+            [
+              "企業研究",
+              "企業名で検索し、業界の変化と企業の動きを結びつける。",
+            ],
+            [
+              "意見の整理",
+              "期待と懸念の両方を読み、自分が確認したい点を考える。",
+            ],
+            [
+              "面接前の復習",
+              "保存した記事から元の情報を読み直し、自分の言葉で説明する。",
+            ],
+          ].map(([t, d]) => (
+            <div key={t} className="rounded-2xl border bg-card p-6">
+              <h3 className="font-bold">{t}</h3>
+              <p className="mt-3 leading-7 text-muted-foreground">{d}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,30 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Menu, X, User } from "lucide-react"
-import { createClient } from "@/utils/supabase/client"
-import { type User as SupabaseUser } from "@supabase/supabase-js"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Menu, X, User } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
-    const supabase = createClient()
+    if (new URLSearchParams(window.location.search).get("demo") === "1") return;
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+      return;
+    const supabase = createClient();
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser().catch(() => setUser(null));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -33,24 +43,40 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">ND</span>
+              <span className="text-primary-foreground font-bold text-sm">
+                ND
+              </span>
             </div>
-            <span className="font-bold text-foreground hidden sm:block">News Digest</span>
+            <span className="font-bold text-foreground hidden sm:block">
+              News Digest
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/news" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/news"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               ニュース
             </Link>
-            <Link href="/#benefits" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/#benefits"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               特徴
             </Link>
-            <Link href="/#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
-              お客様の声
+            <Link
+              href="/#examples"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              使い方
             </Link>
-            <Link href="/#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              料金
+            <Link
+              href="/news?demo=1"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              デモ
             </Link>
           </nav>
 
@@ -103,24 +129,26 @@ export function Header() {
                 特徴
               </Link>
               <Link
-                href="/#testimonials"
+                href="/#examples"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                お客様の声
+                使い方
               </Link>
               <Link
-                href="/#pricing"
+                href="/news?demo=1"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                料金
+                デモ
               </Link>
-              <Button className="w-full mt-2">無料で始める</Button>
+              <Button asChild className="w-full mt-2">
+                <Link href="/news">登録せずに使う</Link>
+              </Button>
             </div>
           </nav>
         )}
       </div>
     </header>
-  )
+  );
 }
