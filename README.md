@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# News Digest for Interview
 
-## Getting Started
+**志望業界のニュースを理解し、根拠を確認して、自分の意見を考える。**
 
-First, run the development server:
+アカウントなしでニュースの閲覧・検索・保存・AI分析を利用できます。就職活動中、複数の業界ニュースを読む負担を減らし、事実と考察を整理するための個人開発アプリです。
 
-```bash
+## まず体験する
+
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- http://localhost:3000 — 使い方と入口
+- http://localhost:3000/news?demo=1 — **APIキー・DB・アカウント不要のデモ**。架空の記事と手作業の分析見本を使用。AIは実行しません。
+- http://localhost:3000/news — RSSによる最新ニュース（インターネット接続が必要）
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Node.js 22を推奨。デモとニュース閲覧には `.env` は不要です。AIを有効にする場合、`.env.example` を `.env.local` にコピーし `GEMINI_API_KEY` を設定してください。`GEMINI_MODEL` は既存モデルを維持するため `gemini-2.5-flash` が既定値です。利用可能なモデルを環境に合わせて設定してください。秘密鍵をブラウザー向け変数に設定しないでください。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Supabaseの公開URL・公開キー、PostgreSQLの接続先は任意のアカウント機能用です。既存の認証・マイページを維持しています。既存DBの変更やマイグレーションの実行は、この改善では行っていません。新規DBでアカウント機能を使う場合は `prisma/schema.prisma` と既存マイグレーションの整合を確認して構築してください。
 
-## Learn More
+## 2分のデモ手順
 
-To learn more about Next.js, take a look at the following resources:
+1. 「デモを試す」を開く。架空記事であることを確認。
+2. 業界で絞り、検索し、しおりボタンで保存。
+3. ページを再読み込みし「あとで読む」で保存が残ることを確認。
+4. 「要約・考えるヒント」を開き、元の概要・事実・根拠・考察・問いを確認。
+5. 短い銀行記事を開き、情報不足時に分析しない動作を確認。
+6. 最新ニュースへ切り替え、出典と元記事への導線を確認。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 設計と工夫
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+固定RSS配信元 → 正規化・重複除去 → 10分キャッシュ → 一覧・検索・ブラウザー保存
+                                                ↓ 記事IDだけ送信
+                            サーバー側で記事を照合 → 情報量チェック
+                                                ↓
+                         Gemini構造化出力 → 型・根拠引用の検証 → 表示
+```
 
-## Deploy on Vercel
+- Next.js / React / TypeScript / Tailwind CSS。任意の認証にSupabase、既存ユーザー情報にPrisma/PostgreSQL。
+- Google Newsで11ジャンルを取得。説明文が比較的豊富なNHK、ITmediaと既存のQiita技術記事も追加し、出典を表示。
+- RSS概要を表示用の80文字に切り詰めず分析。**記事本文は取得していません**。説明文があれば事実の要約を生成し、見出しのみの場合は見出しから分かる範囲を簡潔に整理します。内容を特定できない見出しではモデルを呼び出しません。
+- JSON形式を指定しZodで検証。事実と考察を分離し、概要にない引用を拒否。引用照合は意味の正しさを保証するものではありません。
+- クライアント指定のタイトルや概要をAIに渡さず、サーバーの取得済み記事から入力を構築。
+- プロンプトで記事中の命令をデータとして扱い、数値や成果の補完を禁止。ただしプロンプトだけで完全な防御は保証しません。
+- モデル・プロンプト版・入力ごとの24時間メモリーキャッシュ、同時リクエストの共有、25秒の生成タイムアウト。
+- 1プロセス当たり毎時60回、同時3件の生成上限。**複数インスタンスでの全体上限ではありません**。公開運用では共有ストアでの制限・プロバイダー側予算上限を設定してください。
+- RSS障害は配信元ごとに分離。全取得失敗時はキャッシュを失敗結果で更新せず、エラーと再読み込み・デモ導線を表示。
+- 保存はブラウザー内、最大200件。記事スナップショットを保存するためフィードから消えた記事も閲覧可能。古い記事の新規AI分析は取得対象外として案内。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 検証
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sh
+npm test
+npm run typecheck
+npm run lint
+npm run build
+```
+
+`npm run format:check` で整形を確認できます。環境によってTurbopackの子プロセス起動が制限される場合は `npm run build -- --webpack` で標準のWebpackビルドを利用できます。
+
+[要約品質の評価計画](docs/evaluation.md)には旧方式との比較手順、事実性・情報不足・命令混入などの評価項目を記載。精度向上や時間短縮の数値は未測定です。
+
+## 公開前と今後の課題
+
+- デプロイ先の共有レート制限、AI予算、稼働監視。現行の制限はプロセス単位。
+- Google Newsの概要は見出し相当しかない場合が多く、見出しのみの記事では詳細や背景を要約できません。許諾・提供条件を確認した本文ソースの追加が次の課題です。
+- 要約の意味的な正しさ、モデル耐性、ユーザーテストによる有用性の測定。
+- 保存記事の端末間同期は未実装。アカウントの業界設定とブラウザーの設定は別管理で、ブラウザー設定を優先します。
+- AI分析の永続DB保存は使用せず、旧Insightレコードを残しています。旧形式の分析を新形式として再利用しない設計です。
+- 毎朝メール配信は未実装。画面にも配信完了や架空の利用者実績は表示しません。
+
+Vercel等へは通常のNext.jsアプリとして配置できます。この変更では公開・既存本番の更新を行っていません。公開URLは実際のデプロイ後に記載してください。
+
+## ESで説明できること
+
+情報収集の課題を起点に、ニュース取得からAI分析、出典確認まで実装。改善では入力情報の不足を検知して生成を控える仕組み、根拠引用の検証、事実と考察の表示分離、匿名での体験導線を追加しました。AI支援を利用して実装した範囲と、自分で判断・検証した内容を区別して説明してください。
+
+参考：[Geminiの構造化出力](https://ai.google.dev/gemini-api/docs/structured-output)
+
+## 2026-09-30の依存関係確認
+
+Next.jsを16.3.7に更新し、互換範囲の依存更新を実施。`npm audit` の22件（critical 1件を含む）は4件のhigh警告まで減少しました。残りはPrisma開発ツールの依存（deepmerge-ts / mysql2とその親）です。破壊的なPrismaダウングレードは行っていません。公開前に最新の修正版と影響を再確認してください。

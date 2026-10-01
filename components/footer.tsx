@@ -1,34 +1,20 @@
+import Link from "next/link";
 export function Footer() {
   return (
-    <footer className="py-12 px-4 bg-primary text-primary-foreground">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-foreground/10 rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">ND</span>
-            </div>
-            <span className="font-bold">News Digest for Interview</span>
-          </div>
-
-          {/* Links */}
-          <nav className="flex flex-wrap justify-center gap-6 text-sm">
-            <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-              利用規約
-            </a>
-            <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-              プライバシーポリシー
-            </a>
-            <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-              お問い合わせ
-            </a>
-          </nav>
+    <footer className="border-t px-4 py-10">
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-6">
+        <div>
+          <p className="font-bold">News Digest</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            ニュースを理解し、自分の視点を見つける。
+          </p>
         </div>
-        
-        <div className="mt-8 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-          © 2026 News Digest for Interview. All rights reserved.
-        </div>
+        <nav className="flex gap-5 text-sm">
+          <Link href="/news">ニュース</Link>
+          <Link href="/news?demo=1">デモ</Link>
+          <Link href="/about">使い方・データについて</Link>
+        </nav>
       </div>
     </footer>
-  )
+  );
 }
