@@ -181,13 +181,16 @@ export function NewsDashboard({
             />
             選んだ業界だけ表示する
           </label>
-          <p className="mt-3 text-xs text-muted-foreground">
-            アカウントの業界設定は
-            <Link href="/mypage" className="underline">
-              マイページ
-            </Link>
-            から管理できます。
-          </p>
+          {process.env.NEXT_PUBLIC_SUPABASE_URL &&
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                アカウントの業界設定は
+                <Link href="/mypage" className="underline">
+                  マイページ
+                </Link>
+                から管理できます。
+              </p>
+            )}
         </details>
       </div>
       {notice && (

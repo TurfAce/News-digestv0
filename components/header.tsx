@@ -10,14 +10,14 @@ import { type User as SupabaseUser } from "@supabase/supabase-js";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const authAvailable = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("demo") === "1") return;
-    if (
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-      return;
+    if (!authAvailable) return;
     const supabase = createClient();
     const getUser = async () => {
       const {
@@ -34,7 +34,7 @@ export function Header() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [authAvailable]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -82,7 +82,11 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:block">
-            {user ? (
+            {!authAvailable ? (
+              <Button asChild>
+                <Link href="/news">ニュースを読む</Link>
+              </Button>
+            ) : user ? (
               <Button asChild variant="ghost">
                 <Link href="/mypage" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
